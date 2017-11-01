@@ -12,9 +12,10 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'morphys==1.0',
-    'pymultihash==0.8.2',
-    'pyrsistent==0.13.0',
+    'base58',
+    'morphys',
+    'pymultihash',
+    'pyrsistent',
 ]
 
 setup_requirements = [

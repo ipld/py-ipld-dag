@@ -2,6 +2,7 @@
 
 """Main module."""
 import base58
+import json
 import multihash
 from copy import deepcopy
 
@@ -53,7 +54,8 @@ class Node(object):
         return self._size
 
     @classmethod
-    def create(cls, data, links=None, hash_algorithm='sha2-256', serializer=None):
+    def create(cls, data, links=None, hash_algorithm='sha2-256',
+            serializer=json.dumps):
         links = [l for l in links if isinstance(l, Link)] if links is not None else []
         serialized = ensure_bytes(serializer({'data': data, 'links': links}))
         mh = multihash.digest(serialized, hash_algorithm).encode('base58')
@@ -89,9 +91,6 @@ class Node(object):
 
     def clone(self):
         return deepcopy(self)
-
-    def __str__(self):
-        pass
 
     def __repr__(self):
         return '{class_}("{multihash}", data="{data}", links={links}, size={size})'.format(
