@@ -20,29 +20,13 @@ from .utils import node_to_link
 # @TODO: if I can use immutable data structures, we can actually
 # @TODO: get over all the data copying overhead involved
 class Node(object):
-    def __init__(self, data, links, serialized, multihash):
+    def __init__(self, data, links, hash_algorithm='sha2-256', formatter='dag-pb'):
         self._data = ensure_bytes(data)
-
-        if isinstance(multihash, bytes):
-            self._multihash = base58.b58decode(multihash)
-        else:
-            raise TypeError('multihash should be either a str or bytes object')
-
-        self._serialized = serialized
         self._links = [] if links is None else links
-        self._size = sum((link.size for link in self._links), len(self._serialized))
 
     @property
     def data(self):
         return self._data
-
-    @property
-    def multihash(self):
-        return self._multihash
-
-    @property
-    def serialized(self):
-        return self._serialized
 
     @property
     def links(self):
@@ -50,15 +34,7 @@ class Node(object):
 
     @property
     def size(self):
-        return self._size
-
-    @classmethod
-    def create(cls, data, links=None, hash_algorithm='sha2-256', serializer=None):
-        links = [l for l in links if isinstance(l, Link)] if links is not None else []
-        serialized = ensure_bytes(serializer({'data': data, 'links': links}))
-        mh = multihash.digest(serialized, hash_algorithm).encode('base58')
-
-        return Node(data, links, serialized, mh)
+        return sum((link.size for link in self._links), len(self._serialized))
 
     # @TODO: should not be a class method
     @classmethod

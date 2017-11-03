@@ -1,3 +1,4 @@
+# @TODO: maybe move to Node class
 def node_to_link(node):
     from .dag import Link, Node
 

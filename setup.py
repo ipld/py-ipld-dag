@@ -28,7 +28,7 @@ test_requirements = [
 ]
 
 setup(
-    name='dag',
+    name='py-ipld-dag',
     version='0.1.0',
     description="MerkelDAG implementation in Python",
     long_description=readme + '\n\n' + history,

@@ -19,7 +19,7 @@ MerkelDAG implementation in Python
 
 * Free software: MIT license
 * Documentation: https://py-ipld-dag.readthedocs.io.
-
+* Python versions: 3.5, 3.6
 
 Features
 --------
