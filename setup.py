@@ -12,6 +12,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
+    'base58==0.2.5',
     'morphys==1.0',
     'pymultihash==0.8.2',
     'pyrsistent==0.13.0',
@@ -19,12 +20,6 @@ requirements = [
 
 setup_requirements = [
     'pytest-runner',
-    # TODO(dhruvbaldawa): put setup requirements (distutils extensions, etc.) here
-]
-
-test_requirements = [
-    'pytest',
-    # TODO: put package test requirements here
 ]
 
 setup(
@@ -54,6 +49,5 @@ setup(
 
     ],
     test_suite='tests',
-    tests_require=test_requirements,
     setup_requires=setup_requirements,
 )

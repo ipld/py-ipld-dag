@@ -34,16 +34,16 @@ clean-build: ## remove build artifacts
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+	find . -name '*.egg' -exec rm -fr {} +
 
 clean-pyc: ## remove Python file artifacts
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
+	find . -name '*.pyc' -exec rm -fr {} +
+	find . -name '*.pyo' -exec rm -fr {} +
+	find . -name '*~' -exec rm -fr {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test: ## remove test and coverage artifacts
-	rm -f .coverage
+	rm -fr .coverage
 	rm -fr htmlcov/
 
 lint: ## check style with flake8
@@ -51,7 +51,7 @@ lint: ## check style with flake8
 
 test: ## run tests quickly with the default Python
 	py.test --cov=dag/ --cov-report=html --cov-report=term-missing --cov-branch
-	
+
 
 test-all: ## run tests on every Python version with tox
 	tox
@@ -63,8 +63,8 @@ coverage: ## check code coverage quickly with the default Python
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/dag.rst
-	rm -f docs/modules.rst
+	rm -fr docs/dag.rst
+	rm -fr docs/modules.rst
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
@@ -85,4 +85,4 @@ dist: clean ## builds source and wheel package
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	python setup.py install
+	pip install .
