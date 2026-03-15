@@ -145,3 +145,9 @@ check-git:
 		echo "Error: You must have a remote named 'upstream' that points to 'py-libp2p'"; \
 		exit 1; \
 	fi
+
+build-docs:
+	sphinx-apidoc -o docs/ . "*conftest*" tests/
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+	$(MAKE) -C docs doctest
