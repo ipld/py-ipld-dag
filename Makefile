@@ -135,6 +135,10 @@ ifndef bump
 	$(error bump must be set, typically: major, minor, patch, or devnum)
 endif
 
+validate-newsfragments:
+	python ./newsfragments/validate_files.py
+	towncrier build --draft --version preview
+
 check-git:
 	# require that upstream is configured for libp2p/py-libp2p
 	@if ! git remote -v | grep "upstream[[:space:]]git@github.com:libp2p/py-libp2p.git (push)\|upstream[[:space:]]https://github.com/libp2p/py-libp2p (push)"; then \
