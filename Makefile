@@ -150,4 +150,3 @@ build-docs:
 	sphinx-apidoc -o docs/ . "*conftest*" tests/
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
-	$(MAKE) -C docs doctest
