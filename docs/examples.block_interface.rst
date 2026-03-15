@@ -1,21 +1,6 @@
-examples.block\_interface package
-=================================
+Block Interface Example
+=======================
 
-Submodules
-----------
-
-examples.block\_interface.block\_interface module
--------------------------------------------------
-
-.. automodule:: examples.block_interface.block_interface
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: examples.block_interface
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. literalinclude:: ../examples/block_interface/block_interface.py
+    :language: python
+    :linenos:

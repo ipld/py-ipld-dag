@@ -11,11 +11,3 @@ Subpackages
    examples.cid_interface
    examples.multicodec_interface
    examples.multihash_interface
-
-Module contents
----------------
-
-.. automodule:: examples
-   :members:
-   :show-inheritance:
-   :undoc-members:
