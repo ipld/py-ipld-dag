@@ -1,5 +1,5 @@
-examples package
-================
+Examples
+========
 
 Subpackages
 -----------
