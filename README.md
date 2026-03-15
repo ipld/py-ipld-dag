@@ -1,7 +1,7 @@
 # py-ipld-dag
 
 [![PyPI version](https://img.shields.io/pypi/v/py-ipld-dag.svg)](https://pypi.python.org/pypi/py-ipld-dag)
-[![Documentation](https://readthedocs.org/projects/dag/badge/?version=latest)](https://dag.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://readthedocs.org/projects/dag/badge/?version=latest)](https://py-ipld-dag.readthedocs.io/en/latest/?badge=latest)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 **IPLD DAG implementation for Python** — codecs for DAG-CBOR, DAG-JSON, DAG-PB, and Raw, aligned with the [js-multiformats](https://github.com/multiformats/js-multiformats) ecosystem.
