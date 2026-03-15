@@ -1,9 +1,6 @@
 Examples
 ========
 
-Subpackages
------------
-
 .. toctree::
    :maxdepth: 4
 

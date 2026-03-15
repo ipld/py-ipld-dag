@@ -1,21 +1,6 @@
-examples.cid\_interface package
-===============================
+CID Interface Example
+=====================
 
-Submodules
-----------
-
-examples.cid\_interface.cid\_interface module
----------------------------------------------
-
-.. automodule:: examples.cid_interface.cid_interface
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: examples.cid_interface
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. literalinclude:: ../examples/cid_interface/cid_interface.py
+    :language: python
+    :linenos:

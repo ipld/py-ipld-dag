@@ -1,21 +1,6 @@
-examples.multicodec\_interface package
-======================================
+Multicodec Interface Example
+============================
 
-Submodules
-----------
-
-examples.multicodec\_interface.multicodec\_interface module
------------------------------------------------------------
-
-.. automodule:: examples.multicodec_interface.multicodec_interface
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: examples.multicodec_interface
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. literalinclude:: ../examples/multicodec_interface/multicodec_interface.py
+    :language: python
+    :linenos:
