@@ -9,6 +9,7 @@ Table of contents
 
    installation
    usage
+   examples
    api_reference
    contributing
    authors
