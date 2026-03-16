@@ -1,0 +1,2 @@
+Fix documentation: all ReadTheDocs links and badge now point to ``py-ipld-dag.readthedocs.io``.
+Contributor docs now list only ``make`` as a system prerequisite (removed incorrect CMake, pkg-config, and GMP requirements).

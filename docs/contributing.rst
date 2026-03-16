@@ -25,17 +25,11 @@ Linux Setup
 Prerequisites
 """""""""""""
 
-On Debian Linux, you need to install the following dependencies:
-
-- `GNU Multiprecision Arithmetic Library <https://gmplib.org/>`_
-- `CMake <https://cmake.org>`_
-- `freedesktop.org pkg-config <https://www.freedesktop.org/wiki/Software/pkg-config>`_
-
-Install them with:
+On Debian Linux, install ``make`` if needed (e.g. for ``make test``, ``make docs-ci``):
 
 .. code:: sh
 
-    sudo apt-get install cmake pkg-config libgmp-dev
+    sudo apt install make
 
 Setup Steps
 """""""""""
@@ -98,17 +92,7 @@ macOS Setup
 Prerequisites
 """""""""""""
 
-On macOS, you need to install the following dependencies:
-
-- `GNU Multiprecision Arithmetic Library <https://gmplib.org/>`_
-- `CMake <https://cmake.org>`_
-- `freedesktop.org pkg-config <https://www.freedesktop.org/wiki/Software/pkg-config>`_
-
-Install them with:
-
-.. code:: sh
-
-    brew install cmake pkgconfig gmp
+On macOS, ``make`` is usually already available (e.g. via Xcode Command Line Tools: ``xcode-select --install``). No other system packages are required.
 
 Setup Steps
 """""""""""
@@ -146,12 +130,6 @@ Then set up the development environment:
     uv pip install --group dev -e .
     pre-commit install
 
-On macOS, help the build command find and link against the ``gmp`` library:
-
-.. code:: sh
-
-    CFLAGS="`pkg-config --cflags gmp`" LDFLAGS="`pkg-config --libs gmp`" uv pip install --group dev -e .
-
 **Option 2: Manual setup with pip:**
 
 .. code:: sh
@@ -162,13 +140,6 @@ On macOS, help the build command find and link against the ``gmp`` library:
     pip install --upgrade pip  # Ensure pip >= 25.1 for PEP 735 support
     pip install --group dev -e .
     pre-commit install
-
-On macOS, help the build command find and link against the ``gmp`` library:
-
-.. code:: sh
-
-    pip install --upgrade pip  # Ensure pip >= 25.1 for PEP 735 support
-    CFLAGS="`pkg-config --cflags gmp`" LDFLAGS="`pkg-config --libs gmp`" pip install --group dev -e .
 
 **Note:** This project uses PEP 735 ``[dependency-groups]`` which requires pip >= 25.1.
 If you have an older pip version, upgrade it first.
@@ -207,16 +178,7 @@ Prerequisites
         winget install --id Git.Git -e
         git --version
 
-3. **CMake**
-   - Install CMake with ``winget`` or download from `cmake.org <https://cmake.org/download/>`_.
-   - Add CMake to your PATH during installation, then verify:
-
-   .. code:: powershell
-
-        winget install --id Kitware.CMake -e
-        cmake --version
-
-4. **Make**
+3. **Make**
     - Option 1: Use Git Bash (included with Git) as a shell.
     - Option 2: Install ``make`` via Chocolatey (install Chocolatey first if needed: `choco.io <https://chocolatey.org/install>`_).
     - Verify installation:
