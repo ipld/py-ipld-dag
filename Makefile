@@ -104,10 +104,6 @@ pr: clean fix lint typecheck test
 
 # release commands
 
-package-test: clean
-	python -m build
-	python scripts/release/test_package.py
-
 notes: check-bump validate-newsfragments
 	# Let UPCOMING_VERSION be the version that is used for the current bump
 	$(eval UPCOMING_VERSION=$(shell bump-my-version bump --dry-run $(bump) -v | awk -F"'" '/New version will be / {print $$2}'))

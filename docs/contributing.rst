@@ -365,8 +365,8 @@ Releasing
 ~~~~~~~~~
 
 Releases are typically done from the ``master`` branch.
-This project defines ``make notes``, ``make release``, and ``make package-test`` in the
-repository ``Makefile``.
+This project defines ``make notes`` and ``make release`` in the repository
+``Makefile``.
 
 Final test before each release
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -376,7 +376,7 @@ Before releasing a new version, build and test the package:
 .. code:: sh
 
     git checkout master && git pull
-    make package-test
+    python -m build && pip install dist/*.whl  # or install from dist/ and test
 
 This will build the package and install it in a temporary virtual environment. Follow
 the instructions to activate the venv and test whatever you think is important.
