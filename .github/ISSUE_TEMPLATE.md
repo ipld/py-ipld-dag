@@ -1,4 +1,4 @@
-- MerkelDAG implementation in Python version:
+- py-ipld-dag version:
 - Python version:
 - Operating System:
 
