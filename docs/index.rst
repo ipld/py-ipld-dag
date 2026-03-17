@@ -14,7 +14,6 @@ Table of contents
    contributing
    authors
    release_notes
-   readthedocs
 
 Indices and tables
 ==================
