@@ -203,7 +203,7 @@ html_sidebars = {
 }
 
 html_theme_options = {
-    'github_user': 'dhruvbaldawa',
+    'github_user': 'ipld',
     'github_repo': 'py-ipld-dag',
     'github_button': True,
     'github_banner': True,

@@ -1,6 +1,6 @@
 # py-ipld-dag
 
-[![PyPI version](https://img.shields.io/pypi/v/py-ipld-dag.svg)](https://pypi.python.org/pypi/py-ipld-dag)
+[![PyPI version](https://img.shields.io/pypi/v/py-ipld-dag.svg)](https://pypi.org/project/py-ipld-dag/)
 [![Documentation](https://readthedocs.org/projects/py-ipld-dag/badge/?version=latest)](https://py-ipld-dag.readthedocs.io/en/latest/?badge=latest)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 

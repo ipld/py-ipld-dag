@@ -298,13 +298,6 @@ This library uses type hints, which are enforced by the ``mypy`` tool (part of t
 ``pre-commit`` checks). All new code is required to land with type hints, with the
 exception of code within the ``tests`` directory.
 
-Documentation
-~~~~~~~~~~~~~
-
-Good documentation will lead to quicker adoption and happier users. Please check out our
-guide on
-`how to create documentation for the Python Ethereum ecosystem <https://github.com/ethereum/snake-charmers-tactical-manual/blob/main/documentation.md>`_.
-
 Adding Examples
 ~~~~~~~~~~~~~~~
 
@@ -357,7 +350,7 @@ a discussion, and doesn't necessarily need to be the final, finished submission.
 GitHub's documentation for working on pull requests is
 `available here <https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests>`_.
 
-Once you've made a pull request, take a look at the Circle CI build status in the
+Once you've made a pull request, take a look at the GitHub Actions build status in the
 GitHub interface and make sure all tests are passing. In general pull requests that
 do not pass the CI build yet won't get reviewed unless explicitly requested.
 
@@ -371,9 +364,9 @@ introduces the feature or bugfix.
 Releasing
 ~~~~~~~~~
 
-Releases are typically done from the ``main`` branch (this repo uses ``master``).
-This project does not define ``make notes``, ``make release``, or ``make package-test``;
-use the tools directly as below.
+Releases are typically done from the ``master`` branch.
+This project defines ``make notes``, ``make release``, and ``make package-test`` in the
+repository ``Makefile``.
 
 Final test before each release
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -383,7 +376,7 @@ Before releasing a new version, build and test the package:
 .. code:: sh
 
     git checkout master && git pull
-    python -m build && pip install dist/*.whl  # or install from dist/ and test
+    make package-test
 
 This will build the package and install it in a temporary virtual environment. Follow
 the instructions to activate the venv and test whatever you think is important.
@@ -402,28 +395,24 @@ updates ``docs/release_notes.rst``):
 
 .. code:: sh
 
-    towncrier build --version VERSION
+    make notes bump=PART
 
-Use the version you are about to release (e.g. ``0.1.1``). Check the updated
-``docs/release_notes.rst``, then commit it.
+Use ``PART`` as ``patch``, ``minor``, or ``major``. This generates the release notes for
+the upcoming version and commits the result.
 
 Bump version and tag
 ^^^^^^^^^^^^^^^^^^^^
 
-Bump the version in ``pyproject.toml`` and ``dag/__init__.py``, commit, and tag:
+Bump the version, build the package, push the release commit and tag, and upload to
+PyPI:
 
 .. code:: sh
 
-    bump-my-version bump PART
+    make release bump=PART
 
-where ``PART`` is ``patch``, ``minor``, or ``major``. This creates a commit and a tag
-(e.g. ``v0.1.1``). Then build the package, push the commit and tag, and upload to PyPI:
-
-.. code:: sh
-
-    python -m build
-    git push && git push --tags
-    twine upload dist/*
+where ``PART`` is ``patch``, ``minor``, or ``major``. This creates a version bump
+commit and tag (e.g. ``v0.1.1``), builds the package, pushes the commit and tag, and
+uploads the distribution.
 
 Which version part to bump
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
