@@ -16,10 +16,12 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        toxenv: [core, lint, wheel]
+        toxenv: [core, wheel]
         include:
           - python-version: "3.10"
             toxenv: docs
+          - python-version: "3.10"
+            toxenv: lint
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +51,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        toxenv: [core, lint, wheel]
+        toxenv: [core, wheel]
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
