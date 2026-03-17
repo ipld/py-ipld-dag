@@ -58,7 +58,7 @@ source_suffix = {'.rst': 'restructuredtext', '.md': 'markdown'}
 master_doc = 'index'
 
 # General information about the project.
-project = u'MerkelDAG implementation in Python'
+project = u'py-ipld-dag'
 copyright = u"2017, Dhruv Baldawa"
 
 # The version info for the project you're documenting, acts as replacement
