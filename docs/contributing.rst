@@ -161,7 +161,7 @@ Windows Development Setup
 Prerequisites
 """""""""""""
 
-1. **Python 3.11+**
+1. **Python 3.10+**
    - Download and install Python from `python.org <https://www.python.org/downloads/>`_ or the Microsoft Store.
    - Verify installation:
 
