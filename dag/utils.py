@@ -69,12 +69,21 @@ def node_to_link(node: Any) -> Any:
         This function is retained for backward compatibility only.
         Use the codec/block API instead.
     """
+    import warnings
+
+    warnings.warn(
+        "node_to_link() is deprecated; use dag.Block and codecs instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     from .dag import Link, Node
 
     if not isinstance(node, Node):
         raise TypeError("node should be an instance of type Node")
 
-    return Link("", node.size, node.multihash)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        return Link("", node.size, node.multihash)
 
 
 def collect_links(value: Any) -> list[tuple[str, CID]]:
