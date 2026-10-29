@@ -112,14 +112,25 @@ def _base64_decode_no_pad(s: str) -> bytes:
 def _restore_from_json(node: Any) -> Any:
     """Recursively restore IPLD values from parsed JSON."""
     if isinstance(node, dict):
-        if len(node) == 1 and _LINK_KEY in node:
+        if _LINK_KEY in node:
+            if len(node) != 1:
+                raise ValueError(f"Invalid DAG-JSON object: '/' must be the only key, got {list(node)!r}")
             link_value = node[_LINK_KEY]
 
             if isinstance(link_value, str):
                 return _parse_cid_string(link_value)
 
-            if isinstance(link_value, dict) and len(link_value) == 1 and "bytes" in link_value:
+            if (
+                isinstance(link_value, dict)
+                and len(link_value) == 1
+                and "bytes" in link_value
+                and isinstance(link_value["bytes"], str)
+            ):
                 return _base64_decode_no_pad(link_value["bytes"])
+
+            raise ValueError(
+                f'Invalid DAG-JSON \'/\' form: expected CID string or {{"bytes": "<base64>"}}, got {link_value!r}'
+            )
 
         return {k: _restore_from_json(v) for k, v in node.items()}
 
