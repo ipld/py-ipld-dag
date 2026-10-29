@@ -25,7 +25,7 @@ from cid import from_bytes as cid_from_bytes
 from cid import make_cid
 
 from ..codec import BlockCodec, register_codec
-from ..ipld_model import CID, IPLDNode, is_cid
+from ..ipld_model import CID, IPLDNode, is_cid, validate_string_map_keys
 from ..multicodec_codes import DAG_CBOR_CODE, DAG_CBOR_NAME
 
 _CID_CBOR_TAG = 42
@@ -81,6 +81,7 @@ def _prepare_for_cbor(node: Any) -> Any:
         return cbor2.CBORTag(_CID_CBOR_TAG, _MULTIBASE_IDENTITY + cid_bytes)
 
     if isinstance(node, dict):
+        validate_string_map_keys(node, context="DAG-CBOR map")
         return {k: _prepare_for_cbor(v) for k, v in node.items()}
 
     if isinstance(node, list):
