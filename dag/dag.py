@@ -1,4 +1,5 @@
 import json
+import warnings
 from copy import deepcopy
 
 import base58
@@ -34,7 +35,18 @@ def _ensure_bytes(value):
 # @TODO: if I can use immutable data structures, we can actually
 # @TODO: get over all the data copying overhead involved
 class Node:
+    """Legacy MerkleDAG node.
+
+    .. deprecated::
+        Use :class:`dag.block.Block` and the codec API instead.
+    """
+
     def __init__(self, data, links, serialized, multihash):
+        warnings.warn(
+            "dag.dag.Node is deprecated; use dag.Block and codecs instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._data = _ensure_bytes(data)
 
         if isinstance(multihash, bytes):
@@ -130,7 +142,18 @@ class Node:
 
 
 class Link:
+    """Legacy MerkleDAG link.
+
+    .. deprecated::
+        Use CID links in the Block/codec API instead.
+    """
+
     def __init__(self, name, size, multihash):
+        warnings.warn(
+            "dag.dag.Link is deprecated; use CID links via dag.Block instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self._name = name
         self._size = size
         self._multihash = multihash

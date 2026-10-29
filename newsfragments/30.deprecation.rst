@@ -1,0 +1,1 @@
+Deprecate legacy ``Node``/``Link`` and ``node_to_link()`` in favor of ``Block``.
