@@ -204,15 +204,22 @@ def _decode_pb_link(data: bytes) -> PBLink:
     return link
 
 
+def _link_sort_key(link: PBLink) -> tuple[int, bytes]:
+    """Sort key for DAG-PB links: named (by UTF-8 name), then unnamed."""
+    if link.name is not None:
+        return (0, link.name.encode("utf-8"))
+    return (1, b"")
+
+
 def _encode_pb_node(node: PBNode) -> bytes:
     """Encode a PBNode to protobuf bytes.
 
     Links (field 2) are encoded first, then Data (field 1).
-    This matches the canonical DAG-PB encoding order.
+    Links are sorted by Name (byte-wise); unnamed links come last.
     """
     parts: list[bytes] = []
 
-    for link in node.links:
+    for link in sorted(node.links, key=_link_sort_key):
         link_bytes = _encode_pb_link(link)
         parts.append(_encode_length_delimited(2, link_bytes))
 

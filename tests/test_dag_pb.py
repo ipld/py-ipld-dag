@@ -106,6 +106,36 @@ class DagPbLinksTestCase:
         assert decoded["Links"][0]["Name"] == "a"
         assert decoded["Links"][1]["Name"] == "b"
 
+    def test_links_sorted_by_name_for_canonical_encode(self, sample_cid):
+        mh2 = multihash.digest(b"other", "sha2-256")
+        cid2 = make_cid(1, "dag-cbor", mh2.encode())
+        mh3 = multihash.digest(b"unnamed", "sha2-256")
+        cid3 = make_cid(1, "dag-cbor", mh3.encode())
+
+        ordered = {
+            "Data": b"parent",
+            "Links": [
+                {"Hash": sample_cid, "Name": "alpha", "Tsize": 1},
+                {"Hash": cid2, "Name": "beta", "Tsize": 2},
+                {"Hash": cid3, "Tsize": 3},
+            ],
+        }
+        reversed_named = {
+            "Data": b"parent",
+            "Links": [
+                {"Hash": cid3, "Tsize": 3},
+                {"Hash": cid2, "Name": "beta", "Tsize": 2},
+                {"Hash": sample_cid, "Name": "alpha", "Tsize": 1},
+            ],
+        }
+        assert encode(ordered) == encode(reversed_named)
+        decoded = decode(encode(reversed_named))
+        assert [link.get("Name") for link in decoded["Links"]] == [
+            "alpha",
+            "beta",
+            None,
+        ]
+
     def test_link_without_name(self, sample_cid):
         val = {
             "Data": b"data",
