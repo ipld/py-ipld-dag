@@ -1,0 +1,1 @@
+Reject non-string map keys when encoding DAG-CBOR.

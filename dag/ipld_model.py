@@ -100,6 +100,16 @@ def is_cid(value: Any) -> bool:
     return isinstance(value, (CIDv0, CIDv1))
 
 
+def validate_string_map_keys(mapping: dict[Any, Any], *, context: str = "IPLD map") -> None:
+    """Raise ``TypeError`` if *mapping* has any non-string key.
+
+    DAG-CBOR and DAG-JSON require string map keys.
+    """
+    for key in mapping:
+        if not isinstance(key, str):
+            raise TypeError(f"{context} keys must be strings, got {type(key).__name__}: {key!r}")
+
+
 def is_ipld_value(value: Any) -> bool:
     """Return ``True`` if *value* is representable in the IPLD Data Model."""
     try:

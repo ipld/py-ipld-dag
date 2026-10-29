@@ -141,6 +141,18 @@ class DagCborCidTestCase:
         assert is_cid(decoded["link"])
 
 
+class DagCborValidationTestCase:
+    """Tests for DAG-CBOR encode validation."""
+
+    def test_rejects_non_string_map_keys(self):
+        with pytest.raises(TypeError, match="DAG-CBOR map keys must be strings"):
+            encode({1: "bad"})
+
+    def test_rejects_nested_non_string_map_keys(self):
+        with pytest.raises(TypeError, match="DAG-CBOR map keys must be strings"):
+            encode({"ok": {b"x": 1}})
+
+
 class DagCborDeterminismTestCase:
     """Tests for deterministic encoding."""
 
