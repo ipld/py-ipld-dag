@@ -145,6 +145,22 @@ class DagJsonValidationTestCase:
             encode({"ok": {b"x": 1}})
 
 
+class DagJsonSlashNamespaceTestCase:
+    """Tests for strict DAG-JSON '/' namespace on decode."""
+
+    def test_rejects_unknown_slash_form(self):
+        with pytest.raises(ValueError, match="Invalid DAG-JSON '/' form"):
+            decode(b'{"/":{"not":"bytes"}}')
+
+    def test_rejects_slash_with_extra_keys(self):
+        with pytest.raises(ValueError, match="only key"):
+            decode(b'{"/":"bafy","extra":1}')
+
+    def test_rejects_bytes_form_with_non_string(self):
+        with pytest.raises(ValueError, match="Invalid DAG-JSON '/' form"):
+            decode(b'{"/":{"bytes":1}}')
+
+
 class DagJsonDeterminismTestCase:
     """Tests for deterministic encoding."""
 

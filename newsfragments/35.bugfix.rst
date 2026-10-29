@@ -1,0 +1,1 @@
+Strictly validate DAG-JSON ``{"/": ...}`` forms on decode.
