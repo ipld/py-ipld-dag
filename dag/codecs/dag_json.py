@@ -29,7 +29,7 @@ from typing import Any
 from cid import make_cid
 
 from ..codec import BlockCodec, register_codec
-from ..ipld_model import CID, IPLDNode, is_cid
+from ..ipld_model import CID, IPLDNode, is_cid, validate_string_map_keys
 from ..multicodec_codes import DAG_JSON_CODE, DAG_JSON_NAME
 
 _LINK_KEY = "/"
@@ -89,6 +89,7 @@ def _prepare_for_json(node: Any) -> Any:
         return {_LINK_KEY: {"bytes": _base64_encode_no_pad(bytes(node))}}
 
     if isinstance(node, dict):
+        validate_string_map_keys(node, context="DAG-JSON map")
         result = {}
         for k, v in node.items():
             result[k] = _prepare_for_json(v)
