@@ -94,6 +94,12 @@ class Block:
         if isinstance(codec, int):
             codec = get_codec(codec)
 
+        if version == 0:
+            if codec.name != "dag-pb":
+                raise ValueError(f"CIDv0 requires the dag-pb codec, got {codec.name!r}")
+            if hasher != "sha2-256":
+                raise ValueError(f"CIDv0 requires the sha2-256 hasher, got {hasher!r}")
+
         encoded = codec.encode(value)
         mh = _multihash.digest(encoded, hasher)
         cid = make_cid(version, codec.name, mh.encode())
@@ -123,6 +129,12 @@ class Block:
         """
         if isinstance(codec, int):
             codec = get_codec(codec)
+
+        if version == 0:
+            if codec.name != "dag-pb":
+                raise ValueError(f"CIDv0 requires the dag-pb codec, got {codec.name!r}")
+            if hasher != "sha2-256":
+                raise ValueError(f"CIDv0 requires the sha2-256 hasher, got {hasher!r}")
 
         value = codec.decode(data)
         mh = _multihash.digest(data, hasher)
