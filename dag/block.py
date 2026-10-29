@@ -26,6 +26,10 @@ from .codec import BlockCodec, get_codec
 from .ipld_model import CID, IPLDNode, is_cid
 
 
+class LinkBoundaryError(LookupError):
+    """Raised when path traversal would cross a CID link into another block."""
+
+
 class Block:
     """An immutable IPLD block: ``CID`` + ``bytes`` + ``value``.
 
@@ -168,11 +172,20 @@ class Block:
         """Resolve a ``/``-separated path into this block's value.
 
         Returns the value at that path, or raises ``KeyError`` /
-        ``IndexError`` if the path is invalid.
+        ``IndexError`` if the path is invalid. Raises
+        ``LinkBoundaryError`` when the path would traverse through
+        a CID link into another block.
         """
         segments = [s for s in path.split("/") if s]
         current: Any = self._value
-        for seg in segments:
+        for i, seg in enumerate(segments):
+            if is_cid(current):
+                remaining = "/".join(segments[i:])
+                raise LinkBoundaryError(
+                    f"Path crosses block boundary at CID {current}. "
+                    f"Remaining path: {remaining!r}. "
+                    f"Load the linked block to continue traversal."
+                )
             if isinstance(current, dict):
                 current = current[seg]
             elif isinstance(current, list):
