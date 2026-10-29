@@ -4,7 +4,7 @@
 import pytest
 
 from dag import Block, is_cid
-from dag.codecs import dag_cbor
+from dag.codecs import dag_cbor, dag_pb
 
 
 class BlockEncodeTestCase:
@@ -42,6 +42,27 @@ class BlockEncodeTestCase:
         block2 = Block.encode(value=val, codec=dag_cbor.codec)
         assert str(block1.cid) == str(block2.cid)
         assert block1.bytes == block2.bytes
+
+    def test_encode_cidv0_requires_dag_pb(self):
+        with pytest.raises(ValueError, match="CIDv0 requires the dag-pb codec"):
+            Block.encode(value={"hello": True}, codec=dag_cbor.codec, version=0)
+
+    def test_encode_cidv0_requires_sha2_256(self):
+        with pytest.raises(ValueError, match="CIDv0 requires the sha2-256 hasher"):
+            Block.encode(
+                value={"Data": b"x", "Links": []},
+                codec=dag_pb.codec,
+                version=0,
+                hasher="sha2-512",
+            )
+
+    def test_encode_cidv0_dag_pb_ok(self):
+        block = Block.encode(
+            value={"Data": b"hello", "Links": []},
+            codec=dag_pb.codec,
+            version=0,
+        )
+        assert block.cid.version == 0
 
 
 class BlockDecodeTestCase:
