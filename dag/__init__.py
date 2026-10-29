@@ -35,7 +35,7 @@ __email__ = "dhruv@dhruvb.com"
 __version__ = "0.2.1"
 
 from . import codecs as codecs  # triggers auto-registration
-from .block import Block, walk_links
+from .block import Block, LinkBoundaryError, walk_links
 from .codec import (
     BlockCodec,
     BlockDecoder,
@@ -73,6 +73,7 @@ __all__ = [
     "BlockEncoder",
     "IPLDNode",
     "Kind",
+    "LinkBoundaryError",
     "get_codec",
     "is_cid",
     "is_ipld_value",

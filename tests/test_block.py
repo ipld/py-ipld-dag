@@ -3,7 +3,7 @@
 
 import pytest
 
-from dag import Block, is_cid
+from dag import Block, LinkBoundaryError, is_cid
 from dag.codecs import dag_cbor, dag_pb
 
 
@@ -172,6 +172,14 @@ class BlockTraversalTestCase:
         )
         with pytest.raises(KeyError):
             block.get("nonexistent")
+
+    def test_get_across_cid_raises_link_boundary(self, inner_block):
+        block = Block.encode(
+            value={"link": inner_block.cid, "data": "hello"},
+            codec=dag_cbor.codec,
+        )
+        with pytest.raises(LinkBoundaryError, match="block boundary"):
+            block.get("link/nested")
 
 
 class BlockEqualityTestCase:
