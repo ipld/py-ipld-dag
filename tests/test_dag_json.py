@@ -133,6 +133,18 @@ class DagJsonCidTestCase:
         assert decoded["data"] == b"\x01\x02\x03"
 
 
+class DagJsonValidationTestCase:
+    """Tests for DAG-JSON encode validation."""
+
+    def test_rejects_non_string_map_keys(self):
+        with pytest.raises(TypeError, match="DAG-JSON map keys must be strings"):
+            encode({1: "bad"})
+
+    def test_rejects_nested_non_string_map_keys(self):
+        with pytest.raises(TypeError, match="DAG-JSON map keys must be strings"):
+            encode({"ok": {b"x": 1}})
+
+
 class DagJsonDeterminismTestCase:
     """Tests for deterministic encoding."""
 
