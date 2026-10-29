@@ -1,0 +1,1 @@
+Expose ``walk_links`` as a public helper instead of a private import.

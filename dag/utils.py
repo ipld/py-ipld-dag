@@ -82,9 +82,9 @@ def collect_links(value: Any) -> list[tuple[str, CID]]:
 
     Returns a list of ``(path, cid)`` tuples.
 
-    Uses :func:`dag.block._walk_links` internally to avoid
+    Uses :func:`dag.block.walk_links` internally to avoid
     duplicating the recursive traversal logic.
     """
-    from .block import _walk_links
+    from .block import walk_links
 
-    return list(_walk_links(value, ""))
+    return list(walk_links(value))
