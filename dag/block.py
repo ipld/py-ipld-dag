@@ -158,7 +158,7 @@ class Block:
 
     def links(self) -> Iterator[tuple[str, CID]]:
         """Yield ``(path, cid)`` for every CID link in this block's value."""
-        yield from _walk_links(self._value, "")
+        yield from walk_links(self._value, "")
 
     def tree(self) -> Iterator[str]:
         """Yield every path segment in this block's value (depth-first)."""
@@ -196,18 +196,18 @@ class Block:
         return len(self._bytes)
 
 
-def _walk_links(node: Any, prefix: str) -> Iterator[tuple[str, CID]]:
+def walk_links(node: Any, prefix: str = "") -> Iterator[tuple[str, CID]]:
     """Recursively yield ``(path, cid)`` from an IPLD data-model value."""
     if is_cid(node):
         yield (prefix, node)
     elif isinstance(node, dict):
         for k, v in node.items():
             child = f"{prefix}/{k}" if prefix else k
-            yield from _walk_links(v, child)
+            yield from walk_links(v, child)
     elif isinstance(node, list):
         for i, v in enumerate(node):
             child = f"{prefix}/{i}" if prefix else str(i)
-            yield from _walk_links(v, child)
+            yield from walk_links(v, child)
 
 
 def _walk_tree(node: Any, prefix: str) -> Iterator[str]:
