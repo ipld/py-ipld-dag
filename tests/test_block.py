@@ -144,6 +144,15 @@ class BlockTraversalTestCase:
         assert "b" in paths
         assert "b/c" in paths
 
+    def test_tree_depth_limit(self):
+        block = Block.encode(
+            value={"a": 1, "b": {"c": 2, "d": {"e": 3}}},
+            codec=dag_cbor.codec,
+        )
+        assert set(block.tree(depth=1)) == {"a", "b"}
+        assert set(block.tree(depth=2)) == {"a", "b", "b/c", "b/d"}
+        assert list(block.tree(depth=0)) == []
+
     def test_get_map_key(self):
         block = Block.encode(
             value={"hello": "world"},

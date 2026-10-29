@@ -1,0 +1,1 @@
+Add an optional ``depth`` limit to ``Block.tree()``.
