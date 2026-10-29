@@ -164,9 +164,17 @@ class Block:
         """Yield ``(path, cid)`` for every CID link in this block's value."""
         yield from walk_links(self._value, "")
 
-    def tree(self) -> Iterator[str]:
-        """Yield every path segment in this block's value (depth-first)."""
-        yield from _walk_tree(self._value, "")
+    def tree(self, depth: int | None = None) -> Iterator[str]:
+        """Yield every path in this block's value (depth-first).
+
+        Parameters
+        ----------
+        depth:
+            Maximum depth to traverse. ``None`` (default) means unlimited.
+            ``1`` yields only immediate child paths; ``2`` includes
+            grandchildren, and so on. ``0`` or negative yields nothing.
+        """
+        yield from _walk_tree(self._value, "", depth)
 
     def get(self, path: str) -> Any:
         """Resolve a ``/``-separated path into this block's value.
@@ -223,15 +231,20 @@ def walk_links(node: Any, prefix: str = "") -> Iterator[tuple[str, CID]]:
             yield from walk_links(v, child)
 
 
-def _walk_tree(node: Any, prefix: str) -> Iterator[str]:
+def _walk_tree(node: Any, prefix: str, depth: int | None = None) -> Iterator[str]:
     """Recursively yield every path in an IPLD data-model value."""
+    if depth is not None and depth <= 0:
+        return
+
+    child_depth = None if depth is None else depth - 1
+
     if isinstance(node, dict):
         for k, v in node.items():
             child = f"{prefix}/{k}" if prefix else k
             yield child
-            yield from _walk_tree(v, child)
+            yield from _walk_tree(v, child, child_depth)
     elif isinstance(node, list):
         for i, v in enumerate(node):
             child = f"{prefix}/{i}" if prefix else str(i)
             yield child
-            yield from _walk_tree(v, child)
+            yield from _walk_tree(v, child, child_depth)
