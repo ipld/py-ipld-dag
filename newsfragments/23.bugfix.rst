@@ -1,0 +1,1 @@
+Sort DAG-PB links by Name during encode for canonical bytes.
