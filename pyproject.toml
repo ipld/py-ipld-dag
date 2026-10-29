@@ -27,7 +27,7 @@ classifiers = [
 ]
 requires-python = ">=3.10, <4.0"
 dependencies = [
-    "cbor2>=5.4.0",
+    "cbor2>=6.0.0",
     "py-cid>=0.4.0",
     "py-multihash>=3.0.0",
     "base58>=2.0.0",

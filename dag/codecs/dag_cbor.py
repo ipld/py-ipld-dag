@@ -92,10 +92,12 @@ def _prepare_for_cbor(node: Any) -> Any:
     return node
 
 
-def _tag_hook(decoder: Any, tag: cbor2.CBORTag) -> Any:
+def _tag_hook(tag: cbor2.CBORTag, _ignore_tag_errors: bool = False) -> Any:
     """Handle CBOR tags during decoding.
 
     Only tag 42 (CID) is supported in DAG-CBOR.
+
+    Signature matches ``cbor2`` 6.x: ``(tag, ignore_tag_errors)``.
     """
     if tag.tag == _CID_CBOR_TAG:
         cid_bytes = tag.value
