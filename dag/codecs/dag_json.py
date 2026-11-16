@@ -60,7 +60,7 @@ class DagJsonCodec(BlockCodec):
         - No whitespace.
         """
         prepared = _prepare_for_json(node)
-        return json.dumps(prepared, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return json.dumps(prepared, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
 
     def decode(self, data: bytes) -> IPLDNode:
         """Decode DAG-JSON bytes into an IPLD value.

@@ -211,3 +211,34 @@ class DagCborBlockTestCase:
         block = Block.encode(value=val, codec=0x71)
         assert block.value == val
         assert block.cid is not None
+
+
+class DagCborFloatTestCase:
+    """DAG-CBOR floats: always 64-bit, no NaN/Infinity (spec "Strictness" 4-5)."""
+
+    @pytest.mark.parametrize(
+        "val, expected",
+        [
+            (1.5, "fb3ff8000000000000"),  # fits in half precision
+            (0.0, "fb0000000000000000"),
+            (100000.0, "fb40f86a0000000000"),  # fits in single precision
+            (0.1, "fb3fb999999999999a"),
+        ],
+    )
+    def test_float_encoded_as_64_bit(self, val, expected):
+        assert encode(val).hex() == expected
+
+    def test_nested_float_encoded_as_64_bit(self):
+        assert encode({"f": [1.0]}).hex() == "a1616681fb3ff0000000000000"
+
+    def test_bool_and_int_unaffected(self):
+        assert encode([True, 1]).hex() == "82f501"
+
+    @pytest.mark.parametrize("val", [float("nan"), float("inf"), float("-inf")])
+    def test_rejects_non_finite_float(self, val):
+        with pytest.raises(ValueError):
+            encode({"x": [val]})
+
+    def test_decode_accepts_half_precision(self):
+        # Decoders may relax float width (spec "Decode strictness").
+        assert decode(bytes.fromhex("f93e00")) == 1.5
