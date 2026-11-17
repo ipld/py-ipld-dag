@@ -21,11 +21,9 @@ from __future__ import annotations
 from typing import Any
 
 import cbor2
-from cid import from_bytes as cid_from_bytes
-from cid import make_cid
 
 from ..codec import BlockCodec, register_codec
-from ..ipld_model import CID, IPLDNode, is_cid, validate_string_map_keys
+from ..ipld_model import IPLDNode, decode_cid_bytes, is_cid, validate_string_map_keys
 from ..multicodec_codes import DAG_CBOR_CODE, DAG_CBOR_NAME
 
 _CID_CBOR_TAG = 42
@@ -104,42 +102,8 @@ def _tag_hook(tag: cbor2.CBORTag, _ignore_tag_errors: bool = False) -> Any:
         cid_bytes = tag.value
         if isinstance(cid_bytes, bytes) and cid_bytes[:1] == _MULTIBASE_IDENTITY:
             cid_bytes = cid_bytes[1:]
-        return _decode_cid_bytes(cid_bytes)
+        return decode_cid_bytes(cid_bytes)
     raise ValueError(f"Unsupported CBOR tag {tag.tag} in DAG-CBOR (only tag 42 is allowed)")
-
-
-def _decode_cid_bytes(raw_bytes: bytes) -> CID:
-    """Decode raw CID bytes into a ``CIDv0`` or ``CIDv1`` object.
-
-    CIDv1 bytes start with a version byte (``0x01``).
-    CIDv0 bytes are just a raw multihash (starting with the hash
-    function code, e.g. ``0x12`` for sha2-256).
-
-    The py-cid ``from_bytes`` works for CIDv1 (which has a leading
-    version byte 0 or 1). For CIDv0 raw multihash bytes we need
-    to construct the CID directly.
-
-    .. note:: Version assumption
-
-       Currently only CIDv0 and CIDv1 exist.  Any first byte that
-       is not ``0x01`` (CIDv1) is treated as a raw multihash and
-       wrapped as CIDv0 (``dag-pb``).  If a CIDv2 is ever
-       introduced this logic will need to be revisited.  The
-       identity hash function code (``0x00``) is *not* a valid
-       CIDv0 multihash prefix in practice (CIDv0 always uses
-       sha2-256, code ``0x12``), so the current heuristic is safe
-       for all real-world data.
-    """
-    if len(raw_bytes) < 2:
-        raise ValueError("CID bytes too short")
-
-    # CIDv1: first byte is the version marker 0x01
-    if raw_bytes[0] == 0x01:
-        return cid_from_bytes(raw_bytes)
-
-    # CIDv0: raw multihash bytes (no version prefix).  CIDv0 is
-    # always dag-pb with sha2-256, so the first byte should be 0x12.
-    return make_cid(0, "dag-pb", raw_bytes)
 
 
 def _restore_from_cbor(node: Any) -> Any:
