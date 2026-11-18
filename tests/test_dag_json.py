@@ -202,3 +202,31 @@ class DagJsonBlockTestCase:
         val = {"test": 123}
         block = Block.encode(value=val, codec=0x0129)
         assert block.value == val
+
+
+class DagJsonUtf8TestCase:
+    """Non-ASCII strings are written as raw UTF-8, not \\u escapes (matches go/js)."""
+
+    # ipld/codec-fixtures fixtures/string-*
+    @pytest.mark.parametrize(
+        "val, expected_hex",
+        [
+            ("水", "22e6b0b422"),
+            ("𐅑", "22f090859122"),
+            ("Čaues ßvěte!", "22c48c6175657320c39f76c49b74652122"),
+        ],
+    )
+    def test_string_fixture_bytes(self, val, expected_hex):
+        assert encode(val) == bytes.fromhex(expected_hex)
+        assert decode(bytes.fromhex(expected_hex)) == val
+
+    def test_non_ascii_map_key(self):
+        assert encode({"ключ": 1}) == '{"ключ":1}'.encode()
+
+    def test_control_characters_still_escaped(self):
+        assert encode("a\nb\x00") == b'"a\\nb\\u0000"'
+
+    def test_lone_surrogate_rejected(self):
+        # Not valid Unicode, so not an IPLD string; previously emitted as "\ud800".
+        with pytest.raises(ValueError):
+            encode("\ud800")
