@@ -1,0 +1,1 @@
+Write non-ASCII characters in DAG-JSON as raw UTF-8 instead of escaping them, matching other implementations. DAG-JSON bytes and CIDs change for values with non-ASCII text.

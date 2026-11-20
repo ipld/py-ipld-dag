@@ -10,6 +10,7 @@ JSON cannot natively express:
 2. **Bytes** are encoded as ``{"/": {"bytes": "<base64-string>"}}``
 3. Map keys are sorted lexicographically (by UTF-8 bytes).
 4. No whitespace between tokens.
+5. Non-ASCII characters are written as raw UTF-8, not escaped.
 
 The ``{"/": ...}`` namespace is reserved:
 - ``{"/": "<string>"}``      → CID link
@@ -59,9 +60,12 @@ class DagJsonCodec(BlockCodec):
         - bytes → ``{"/": {"bytes": "<base64-no-pad>"}}``
         - Map keys are sorted.
         - No whitespace.
+        - Non-ASCII text as raw UTF-8.
         """
         prepared = _prepare_for_json(node)
-        return json.dumps(prepared, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+        return json.dumps(prepared, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode(
+            "utf-8"
+        )
 
     def decode(self, data: bytes) -> IPLDNode:
         """Decode DAG-JSON bytes into an IPLD value.
