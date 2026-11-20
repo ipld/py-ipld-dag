@@ -1,0 +1,1 @@
+Omit Data from the decoded DAG-PB value when the block has none, instead of returning None. Code reading decoded["Data"] should use .get("Data").
