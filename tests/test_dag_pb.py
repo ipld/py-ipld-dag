@@ -131,9 +131,9 @@ class DagPbLinksTestCase:
         assert encode(ordered) == encode(reversed_named)
         decoded = decode(encode(reversed_named))
         assert [link.get("Name") for link in decoded["Links"]] == [
+            None,
             "alpha",
             "beta",
-            None,
         ]
 
     def test_link_without_name(self, sample_cid):
@@ -224,6 +224,44 @@ class DagPbBlockTestCase:
         val = {"Data": b"test", "Links": []}
         block = Block.encode(value=val, codec=0x70)
         assert block.value == val
+
+
+class DagPbLinkSortTestCase:
+    """Link sorting per the DAG-PB spec: by Name bytes, missing Name == "", stable."""
+
+    LINK = "bafkqabiaaebagba"
+
+    def _link(self, name=None):
+        link = {"Hash": make_cid(self.LINK)}
+        if name is not None:
+            link["Name"] = name
+        return link
+
+    def test_unnamed_sorts_first_fixture_simple_forms_2(self):
+        # ipld/codec-fixtures fixtures/dagpb_simple_forms_2
+        expected = bytes.fromhex(
+            "120b0a0901550005000102030412100a09015500050001020304120362617212100a090155000500010203041203666f6f"
+        )
+        val = {"Links": [self._link("foo"), self._link("bar"), self._link()]}
+        assert encode(val) == expected
+
+    def test_duplicate_names_stable_fixture_simple_forms_3(self):
+        # ipld/codec-fixtures fixtures/dagpb_simple_forms_3
+        expected = bytes.fromhex(
+            "120b0a09015500050001020304120e0a09015500050001020304120161120e0a09015500050001020304120161"
+        )
+        val = {"Links": [self._link("a"), self._link("a"), self._link()]}
+        assert encode(val) == expected
+
+    def test_missing_and_empty_name_keep_order(self):
+        val = {"Links": [self._link(""), self._link(), self._link("a")]}
+        names = [link.get("Name") for link in decode(encode(val))["Links"]]
+        assert names == ["", None, "a"]
+
+    def test_sort_is_bytewise_not_length_first(self):
+        val = {"Links": [self._link("b"), self._link("aa"), self._link("a")]}
+        names = [link.get("Name") for link in decode(encode(val))["Links"]]
+        assert names == ["a", "aa", "b"]
 
 
 class DagPbDataModelFormTestCase:
