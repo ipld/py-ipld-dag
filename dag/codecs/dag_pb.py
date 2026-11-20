@@ -31,7 +31,8 @@ legacy IPFS (UnixFS). A DAG-PB node (``PBNode``) consists of:
 - PBNode.Data:  field 1, wire type 2 (length-delimited) → tag byte ``0x0a``
 - PBNode.Links: field 2, wire type 2 (length-delimited) → tag byte ``0x12``
 
-Links MUST be sorted: first by Name (bytes), then by those without names.
+Links MUST be sorted by Name bytes, with a missing Name treated as empty
+(so unnamed links come first); the sort is stable.
 Encoding is done right-to-left to match the reference implementation.
 
 Reference implementations:
@@ -204,18 +205,20 @@ def _decode_pb_link(data: bytes) -> PBLink:
     return link
 
 
-def _link_sort_key(link: PBLink) -> tuple[int, bytes]:
-    """Sort key for DAG-PB links: named (by UTF-8 name), then unnamed."""
-    if link.name is not None:
-        return (0, link.name.encode("utf-8"))
-    return (1, b"")
+def _link_sort_key(link: PBLink) -> bytes:
+    """Sort key for DAG-PB links: Name as UTF-8 bytes, missing Name as empty.
+
+    Used with ``sorted()``, which is stable, so links with equal or
+    missing names keep their original order (DAG-PB spec, "Link sorting").
+    """
+    return (link.name or "").encode("utf-8")
 
 
 def _encode_pb_node(node: PBNode) -> bytes:
     """Encode a PBNode to protobuf bytes.
 
     Links (field 2) are encoded first, then Data (field 1).
-    Links are sorted by Name (byte-wise); unnamed links come last.
+    Links are sorted by Name bytes; a missing Name sorts as empty.
     """
     parts: list[bytes] = []
 
@@ -342,10 +345,9 @@ def _node_to_dict(node: PBNode) -> dict[str, Any]:
     else:
         result["Links"] = []
 
+    # Absent Data is omitted, not null (DAG-PB spec: "Data may be omitted").
     if node.data is not None:
         result["Data"] = node.data
-    else:
-        result["Data"] = None
 
     return result
 
