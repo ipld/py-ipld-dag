@@ -211,3 +211,29 @@ class DagJsonFloatTestCase:
     def test_rejects_non_finite_float(self, val):
         with pytest.raises(ValueError):
             encode({"x": [val]})
+
+
+class DagJsonCidStringTestCase:
+    """CID strings: CIDv1 in multibase base32, CIDv0 in base58btc (DAG-JSON spec "Links")."""
+
+    def test_cidv1_link_is_base32(self):
+        cid = make_cid("bafkqabiaaebagba")
+        assert encode(cid) == b'{"/":"bafkqabiaaebagba"}'
+
+    def test_cidv1_link_from_base58_input_is_base32(self):
+        cid = make_cid("bafyreihdb57fdysx5h35urvxz64ros7zvywshber7id6t6c6fek37jgyfe")
+        base58 = make_cid(str(cid))  # py-cid str() of a CIDv1 is base58btc
+        assert encode(base58) == b'{"/":"bafyreihdb57fdysx5h35urvxz64ros7zvywshber7id6t6c6fek37jgyfe"}'
+
+    def test_cidv0_link_is_base58(self):
+        cid = make_cid("QmWDtUQj38YLW8v3q4A6LwPn4vYKEbuKWpgSm6bjKW6Xfe")
+        assert encode(cid) == b'{"/":"QmWDtUQj38YLW8v3q4A6LwPn4vYKEbuKWpgSm6bjKW6Xfe"}'
+
+    def test_mixed_cid_array_roundtrip(self):
+        # CIDs taken from ipld/codec-fixtures fixtures/cid-arrayof
+        data = (
+            b'[{"/":"bafyreidykglsfhoixmivffc5uwhcgshx4j465xwqntbmu43nb2dzqwfvae"},'
+            b'{"/":"QmXg9Pp2ytZ14xgmQjYEiHjVjMFXzCVVEcRTWJBmLgR39V"},'
+            b'{"/":"bafkqabiaaebagba"}]'
+        )
+        assert encode(decode(data)) == data

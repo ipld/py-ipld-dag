@@ -5,7 +5,8 @@ Multicodec code: ``0x0129``
 DAG-JSON is JSON with special representations for IPLD types that
 JSON cannot natively express:
 
-1. **CID links** are encoded as ``{"/": "<cid-multibase-string>"}``
+1. **CID links** are encoded as ``{"/": "<cid-string>"}`` (CIDv1 in
+   base32, CIDv0 in base58btc)
 2. **Bytes** are encoded as ``{"/": {"bytes": "<base64-string>"}}``
 3. Map keys are sorted lexicographically (by UTF-8 bytes).
 4. No whitespace between tokens.
@@ -83,7 +84,7 @@ def _base64_encode_no_pad(data: bytes) -> str:
 def _prepare_for_json(node: Any) -> Any:
     """Recursively convert IPLD values for JSON serialization."""
     if is_cid(node):
-        return {_LINK_KEY: str(node)}
+        return {_LINK_KEY: _cid_to_string(node)}
 
     if isinstance(node, (bytes, bytearray)):
         return {_LINK_KEY: {"bytes": _base64_encode_no_pad(bytes(node))}}
@@ -99,6 +100,17 @@ def _prepare_for_json(node: Any) -> Any:
         return [_prepare_for_json(item) for item in node]
 
     return node
+
+
+def _cid_to_string(cid: CID) -> str:
+    """Return the DAG-JSON string form of *cid*.
+
+    CIDv1 must be multibase base32 (``b...``); py-cid's ``str()`` gives
+    base58btc for CIDv1. CIDv0 is always plain base58btc (``Qm...``).
+    """
+    if cid.version == 1:
+        return cid.encode("base32").decode("ascii")
+    return str(cid)
 
 
 def _base64_decode_no_pad(s: str) -> bytes:
