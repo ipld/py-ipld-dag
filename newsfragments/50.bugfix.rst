@@ -1,0 +1,1 @@
+Encode DAG-CBOR floats as 64-bit doubles and reject NaN and Infinity in DAG-CBOR and DAG-JSON. DAG-CBOR bytes and CIDs change for values containing floats.

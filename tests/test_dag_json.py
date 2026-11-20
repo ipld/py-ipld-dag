@@ -204,6 +204,15 @@ class DagJsonBlockTestCase:
         assert block.value == val
 
 
+class DagJsonFloatTestCase:
+    """DAG-JSON: NaN/Infinity are not in the IPLD Data Model."""
+
+    @pytest.mark.parametrize("val", [float("nan"), float("inf"), float("-inf")])
+    def test_rejects_non_finite_float(self, val):
+        with pytest.raises(ValueError):
+            encode({"x": [val]})
+
+
 class DagJsonCidStringTestCase:
     """CID strings: CIDv1 in multibase base32, CIDv0 in base58btc (DAG-JSON spec "Links")."""
 
