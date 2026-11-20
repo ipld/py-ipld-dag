@@ -58,7 +58,7 @@ class Block:
         return self._cid
 
     @property
-    def bytes(self) -> bytes:
+    def bytes(self) -> builtins.bytes:
         """The raw encoded bytes."""
         return self._bytes
 
