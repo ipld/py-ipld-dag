@@ -5,7 +5,7 @@ import multihash
 import pytest
 from cid import make_cid
 
-from dag import Block, is_cid
+from dag import Block, is_cid, lookup_codec
 from dag.codecs.dag_pb import (
     PBLink,
     PBNode,
@@ -50,7 +50,7 @@ class DagPbBasicTestCase:
     def test_no_data(self):
         val = {"Data": None, "Links": []}
         decoded = decode(encode(val))
-        assert decoded["Data"] is None
+        assert decoded == {"Links": []}
 
     def test_encode_pbnode_object(self):
         node = PBNode(data=b"test data")
@@ -131,9 +131,9 @@ class DagPbLinksTestCase:
         assert encode(ordered) == encode(reversed_named)
         decoded = decode(encode(reversed_named))
         assert [link.get("Name") for link in decoded["Links"]] == [
+            None,
             "alpha",
             "beta",
-            None,
         ]
 
     def test_link_without_name(self, sample_cid):
@@ -247,3 +247,68 @@ class DagPbCidV0LinkTestCase:
     def test_cidv0_link_block_cid(self):
         block = Block.decode(data=bytes.fromhex(self.FIXTURE_HEX), codec=codec)
         assert block.cid.buffer == make_cid(self.FIXTURE_CID).buffer
+
+
+class DagPbLinkSortTestCase:
+    """Link sorting per the DAG-PB spec: by Name bytes, missing Name == "", stable."""
+
+    LINK = "bafkqabiaaebagba"
+
+    def _link(self, name=None):
+        link = {"Hash": make_cid(self.LINK)}
+        if name is not None:
+            link["Name"] = name
+        return link
+
+    def test_unnamed_sorts_first_fixture_simple_forms_2(self):
+        # ipld/codec-fixtures fixtures/dagpb_simple_forms_2
+        expected = bytes.fromhex(
+            "120b0a0901550005000102030412100a09015500050001020304120362617212100a090155000500010203041203666f6f"
+        )
+        val = {"Links": [self._link("foo"), self._link("bar"), self._link()]}
+        assert encode(val) == expected
+
+    def test_duplicate_names_stable_fixture_simple_forms_3(self):
+        # ipld/codec-fixtures fixtures/dagpb_simple_forms_3
+        expected = bytes.fromhex(
+            "120b0a09015500050001020304120e0a09015500050001020304120161120e0a09015500050001020304120161"
+        )
+        val = {"Links": [self._link("a"), self._link("a"), self._link()]}
+        assert encode(val) == expected
+
+    def test_missing_and_empty_name_keep_order(self):
+        val = {"Links": [self._link(""), self._link(), self._link("a")]}
+        names = [link.get("Name") for link in decode(encode(val))["Links"]]
+        assert names == ["", None, "a"]
+
+    def test_sort_is_bytewise_not_length_first(self):
+        val = {"Links": [self._link("b"), self._link("aa"), self._link("a")]}
+        names = [link.get("Name") for link in decode(encode(val))["Links"]]
+        assert names == ["a", "aa", "b"]
+
+
+class DagPbDataModelFormTestCase:
+    """Decoded data-model form: absent Data is omitted, Links always present."""
+
+    def test_empty_block_decodes_without_data(self):
+        # ipld/codec-fixtures fixtures/dagpb_empty: data model is {"Links": []}
+        assert decode(b"") == {"Links": []}
+
+    def test_present_data_kept(self):
+        # ipld/codec-fixtures fixtures/dagpb_Data_some
+        assert decode(bytes.fromhex("0a050001020304")) == {"Data": b"\x00\x01\x02\x03\x04", "Links": []}
+
+    @pytest.mark.parametrize(
+        "codec_name, expected_cid",
+        [
+            ("dag-cbor", "bafyreihjsq5okmwdasf4hoiauwxv3vxjuwh2kuh4k5pgzzi3hanepxusjm"),
+            ("dag-json", "baguqeera6mfu3g6n722vx7dbitpnbiyqnwah4ddy4b5c3rwzxc5pntqcupta"),
+        ],
+    )
+    def test_empty_block_cross_codec_cid(self, codec_name, expected_cid):
+        # Re-encoding the decoded dagpb_empty value must give the fixture CIDs.
+        block = Block.encode(value=decode(b""), codec=lookup_codec(codec_name))
+        assert block.cid.buffer == make_cid(expected_cid).buffer
+
+    def test_decoded_value_re_encodes(self):
+        assert encode(decode(b"")) == b""

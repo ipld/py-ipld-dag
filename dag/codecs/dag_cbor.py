@@ -6,7 +6,8 @@ DAG-CBOR is CBOR (RFC 8949) with additional constraints:
 
 1. **Deterministic encoding**: map keys sorted by byte length then
    lexicographically (RFC 7049 §3.9 canonical ordering), smallest
-   possible integer representations, no indefinite-length items.
+   possible integer representations, no indefinite-length items,
+   floats always 64-bit, no NaN or Infinity.
 2. **CID links**: CIDs are encoded using CBOR tag 42 wrapping the
    CID bytes prefixed with a ``0x00`` identity multibase byte.
 3. **No additional CBOR tags** are allowed (only tag 42).
@@ -18,6 +19,8 @@ Reference implementations:
 
 from __future__ import annotations
 
+import math
+import struct
 from typing import Any
 
 import cbor2
@@ -56,6 +59,7 @@ class DagCborCodec(BlockCodec):
         return cbor2.dumps(
             prepared,
             canonical=True,
+            encoders={float: _encode_float64},
         )
 
     def decode(self, data: bytes) -> IPLDNode:
@@ -89,6 +93,18 @@ def _prepare_for_cbor(node: Any) -> Any:
         return bytes(node)
 
     return node
+
+
+def _encode_float64(encoder: cbor2.CBOREncoder, value: float) -> None:
+    """Encode a float as a 64-bit double; reject NaN and Infinity.
+
+    DAG-CBOR requires floats in 64-bit form even when a shorter form is
+    exact, and forbids IEEE 754 special values. cbor2's canonical mode
+    would otherwise shrink floats to half or single precision.
+    """
+    if not math.isfinite(value):
+        raise ValueError(f"DAG-CBOR does not support {value!r} floats")
+    encoder.write(b"\xfb" + struct.pack(">d", value))
 
 
 def _tag_hook(tag: cbor2.CBORTag, _ignore_tag_errors: bool = False) -> Any:

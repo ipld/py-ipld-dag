@@ -1,0 +1,1 @@
+Encode CIDv1 links in DAG-JSON as base32 strings, per the DAG-JSON spec, instead of base58btc. DAG-JSON bytes and CIDs change for values with CIDv1 links.
