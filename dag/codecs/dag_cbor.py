@@ -19,13 +19,14 @@ Reference implementations:
 
 from __future__ import annotations
 
+import io
 import math
 import struct
-from typing import Any
+from typing import Any, BinaryIO, cast
 
 import cbor2
 
-from ..codec import BlockCodec, register_codec
+from ..codec import BlockCodec, CountingWriter, register_codec
 from ..ipld_model import IPLDNode, decode_cid_bytes, is_cid, validate_string_map_keys
 from ..multicodec_codes import DAG_CBOR_CODE, DAG_CBOR_NAME
 
@@ -49,26 +50,39 @@ class DagCborCodec(BlockCodec):
     def code(self) -> int:
         return DAG_CBOR_CODE
 
-    def encode(self, node: IPLDNode) -> bytes:
-        """Encode an IPLD value to DAG-CBOR bytes.
+    def encode_to_stream(self, node: IPLDNode, stream: BinaryIO) -> int:
+        """Encode an IPLD value to DAG-CBOR via ``cbor2.dump``.
 
         CIDs are encoded as ``Tag(42, 0x00 || cid_bytes)``.
         Map keys are sorted using canonical CBOR ordering.
         """
         prepared = _prepare_for_cbor(node)
-        return cbor2.dumps(
+        counter = CountingWriter(stream)
+        cbor2.dump(
             prepared,
+            cast(BinaryIO, counter),
             canonical=True,
             encoders={float: _encode_float64},
         )
+        return counter.written
 
-    def decode(self, data: bytes) -> IPLDNode:
-        """Decode DAG-CBOR bytes into an IPLD value.
+    def decode_from_stream(self, stream: BinaryIO) -> IPLDNode:
+        """Decode DAG-CBOR from a binary stream via ``cbor2.load``.
 
         CBOR tag 42 values are converted back into CID objects.
         """
-        raw = cbor2.loads(data, tag_hook=_tag_hook)
+        raw = cbor2.load(stream, tag_hook=_tag_hook)
         return _restore_from_cbor(raw)
+
+    def encode(self, node: IPLDNode) -> bytes:
+        """Encode an IPLD value to DAG-CBOR bytes."""
+        buf = io.BytesIO()
+        self.encode_to_stream(node, buf)
+        return buf.getvalue()
+
+    def decode(self, data: bytes) -> IPLDNode:
+        """Decode DAG-CBOR bytes into an IPLD value."""
+        return self.decode_from_stream(io.BytesIO(data))
 
 
 def _prepare_for_cbor(node: Any) -> Any:
