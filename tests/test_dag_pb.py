@@ -226,6 +226,29 @@ class DagPbBlockTestCase:
         assert block.value == val
 
 
+class DagPbCidV0LinkTestCase:
+    """Link Hash bytes holding a CIDv0 (a bare multihash, no version byte)."""
+
+    # ipld/codec-fixtures fixtures/dagpb_1link
+    FIXTURE_HEX = "12240a2212207521fe19c374a97759226dc5c0c8e674e73950e81b211f7dd3b6b30883a08a51"
+    FIXTURE_CID = "bafybeihyivpglm6o6wrafbe36fp5l67abmewk7i2eob5wacdbhz7as5obe"
+    LINK_CID = "QmWDtUQj38YLW8v3q4A6LwPn4vYKEbuKWpgSm6bjKW6Xfe"
+
+    def test_decode_cidv0_link(self):
+        value = decode(bytes.fromhex(self.FIXTURE_HEX))
+        link_hash = value["Links"][0]["Hash"]
+        assert link_hash.version == 0
+        assert str(link_hash) == self.LINK_CID
+
+    def test_cidv0_link_roundtrip(self):
+        data = bytes.fromhex(self.FIXTURE_HEX)
+        assert encode(decode(data)) == data
+
+    def test_cidv0_link_block_cid(self):
+        block = Block.decode(data=bytes.fromhex(self.FIXTURE_HEX), codec=codec)
+        assert block.cid.buffer == make_cid(self.FIXTURE_CID).buffer
+
+
 class DagPbLinkSortTestCase:
     """Link sorting per the DAG-PB spec: by Name bytes, missing Name == "", stable."""
 

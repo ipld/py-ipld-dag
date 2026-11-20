@@ -45,10 +45,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from cid import from_bytes as cid_from_bytes
-
 from ..codec import BlockCodec, register_codec
-from ..ipld_model import CID, IPLDNode, is_cid
+from ..ipld_model import CID, IPLDNode, decode_cid_bytes, is_cid
 from ..multicodec_codes import DAG_PB_CODE, DAG_PB_NAME
 
 
@@ -188,7 +186,7 @@ def _decode_pb_link(data: bytes) -> PBLink:
 
             if field_number == 1:
                 # Hash → CID bytes
-                link.hash = cid_from_bytes(field_data)
+                link.hash = decode_cid_bytes(field_data)
             elif field_number == 2:
                 # Name
                 link.name = field_data.decode("utf-8")
