@@ -57,6 +57,7 @@ docs = [
 ]
 test = [
     "pytest",
+    "pytest-benchmark",
     "pytest-runner",
 ]
 release = [
@@ -82,6 +83,7 @@ log_date_format = "%m-%d %H:%M:%S"
 log_format = "%(levelname)8s  %(asctime)s  %(filename)20s  %(message)s"
 markers = [
     "slow: mark test as slow",
+    "benchmark: mark test as a pytest-benchmark microbenchmark",
 ]
 
 [tool.ruff]

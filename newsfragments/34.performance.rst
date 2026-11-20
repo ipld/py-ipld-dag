@@ -1,0 +1,1 @@
+Add pytest-benchmark encode/decode microbenchmarks for DAG-CBOR, DAG-JSON, DAG-PB, raw, and ``Block``.

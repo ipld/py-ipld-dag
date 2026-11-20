@@ -279,6 +279,14 @@ We can run all tests with:
 
     make test
 
+The suite includes codec/Block encode-decode microbenchmarks powered by
+``pytest-benchmark`` (marked ``benchmark``). They run with the default suite.
+To run only those benches:
+
+.. code:: sh
+
+    pytest -m benchmark
+
 
 Code Style
 ~~~~~~~~~~
