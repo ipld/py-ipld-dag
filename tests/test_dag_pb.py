@@ -5,7 +5,7 @@ import multihash
 import pytest
 from cid import make_cid
 
-from dag import Block, is_cid
+from dag import Block, is_cid, lookup_codec
 from dag.codecs.dag_pb import (
     PBLink,
     PBNode,
@@ -50,7 +50,7 @@ class DagPbBasicTestCase:
     def test_no_data(self):
         val = {"Data": None, "Links": []}
         decoded = decode(encode(val))
-        assert decoded["Data"] is None
+        assert decoded == {"Links": []}
 
     def test_encode_pbnode_object(self):
         node = PBNode(data=b"test data")
@@ -224,3 +224,30 @@ class DagPbBlockTestCase:
         val = {"Data": b"test", "Links": []}
         block = Block.encode(value=val, codec=0x70)
         assert block.value == val
+
+
+class DagPbDataModelFormTestCase:
+    """Decoded data-model form: absent Data is omitted, Links always present."""
+
+    def test_empty_block_decodes_without_data(self):
+        # ipld/codec-fixtures fixtures/dagpb_empty: data model is {"Links": []}
+        assert decode(b"") == {"Links": []}
+
+    def test_present_data_kept(self):
+        # ipld/codec-fixtures fixtures/dagpb_Data_some
+        assert decode(bytes.fromhex("0a050001020304")) == {"Data": b"\x00\x01\x02\x03\x04", "Links": []}
+
+    @pytest.mark.parametrize(
+        "codec_name, expected_cid",
+        [
+            ("dag-cbor", "bafyreihjsq5okmwdasf4hoiauwxv3vxjuwh2kuh4k5pgzzi3hanepxusjm"),
+            ("dag-json", "baguqeera6mfu3g6n722vx7dbitpnbiyqnwah4ddy4b5c3rwzxc5pntqcupta"),
+        ],
+    )
+    def test_empty_block_cross_codec_cid(self, codec_name, expected_cid):
+        # Re-encoding the decoded dagpb_empty value must give the fixture CIDs.
+        block = Block.encode(value=decode(b""), codec=lookup_codec(codec_name))
+        assert block.cid.buffer == make_cid(expected_cid).buffer
+
+    def test_decoded_value_re_encodes(self):
+        assert encode(decode(b"")) == b""

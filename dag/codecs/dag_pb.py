@@ -342,10 +342,9 @@ def _node_to_dict(node: PBNode) -> dict[str, Any]:
     else:
         result["Links"] = []
 
+    # Absent Data is omitted, not null (DAG-PB spec: "Data may be omitted").
     if node.data is not None:
         result["Data"] = node.data
-    else:
-        result["Data"] = None
 
     return result
 
