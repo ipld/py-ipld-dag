@@ -8,14 +8,15 @@ A **codec** is identified by:
 - ``name`` - a human-readable string (e.g. ``"dag-cbor"``)
 - ``code`` - the multicodec code (e.g. ``0x71``)
 
-And provides two operations:
-- ``encode(node)`` → ``bytes``   - serialize an IPLD node
-- ``decode(data)`` → ``node``    - deserialize bytes into an IPLD node
+And provides ``encode`` / ``decode`` (bytes) plus ``encode_to_stream`` /
+``decode_from_stream`` (``BinaryIO``; Go Encoder/Decoder-shaped call sites).
 """
 
 from __future__ import annotations
 
 import abc
+import io
+from typing import BinaryIO
 
 from .ipld_model import IPLDNode
 
@@ -61,7 +62,83 @@ class BlockCodec(BlockEncoder, BlockDecoder):
 
     Concrete implementations should subclass this and provide
     ``name``, ``code``, ``encode``, and ``decode``.
+
+    Built-in codecs also override ``encode_to_stream`` /
+    ``decode_from_stream`` to write/read wire bytes via ``BinaryIO``
+    without requiring an intermediate full ``bytes`` blob. Default
+    stream methods buffer via ``encode``/``decode`` for third-party
+    codecs that only implement the bytes API.
+
+    The IPLD value itself is still fully materialized in memory; stream
+    methods improve the *wire* path (similar call shape to go-ipld-prime
+    ``codec.Encoder`` / ``codec.Decoder``).
     """
+
+    def encode_to_stream(self, node: IPLDNode, stream: BinaryIO) -> int:
+        """Encode *node* into *stream*.
+
+        Returns the number of bytes written. The default implementation
+        encodes to ``bytes`` then writes; subclasses may override to
+        stream the wire form directly (e.g. ``cbor2.dump``).
+        """
+        data = self.encode(node)
+        return stream.write(data)
+
+    def decode_from_stream(self, stream: BinaryIO) -> IPLDNode:
+        """Decode an IPLD value from *stream*.
+
+        The default implementation reads all remaining bytes then
+        decodes; subclasses may override to parse from the stream
+        incrementally (e.g. ``cbor2.load``).
+        """
+        data = stream.read()
+        return self.decode(data)
+
+
+class CountingWriter(io.RawIOBase):
+    """Wrap a binary stream and count bytes written.
+
+    Subclasses ``RawIOBase`` so callers like ``cbor2.dump`` accept it.
+    """
+
+    def __init__(self, stream: BinaryIO) -> None:
+        super().__init__()
+        self._stream = stream
+        self.written = 0
+
+    def writable(self) -> bool:
+        return True
+
+    def readable(self) -> bool:
+        return False
+
+    def seekable(self) -> bool:
+        return False
+
+    def write(self, data: bytes | bytearray | memoryview | None) -> int:  # type: ignore[override]
+        if data is None:
+            return 0
+        payload = data.tobytes() if isinstance(data, memoryview) else bytes(data)
+        n = self._stream.write(payload)
+        if n is None:
+            n = len(payload)
+        self.written += n
+        return n
+
+    def flush(self) -> None:
+        flush = getattr(self._stream, "flush", None)
+        if flush is None:
+            return
+        try:
+            flush()
+        except ValueError:
+            # Underlying stream may already be closed during finalization.
+            pass
+
+    def close(self) -> None:
+        # Do not close the wrapped stream; callers own its lifetime.
+        if not self.closed:
+            io.RawIOBase.close(self)
 
 
 _codec_registry: dict[int, BlockCodec] = {}

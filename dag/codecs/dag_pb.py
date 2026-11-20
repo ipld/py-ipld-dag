@@ -42,8 +42,9 @@ Reference implementations:
 
 from __future__ import annotations
 
+import io
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, BinaryIO
 
 from ..codec import BlockCodec, register_codec
 from ..ipld_model import CID, IPLDNode, decode_cid_bytes, is_cid
@@ -365,11 +366,22 @@ class DagPbCodec(BlockCodec):
     def code(self) -> int:
         return DAG_PB_CODE
 
-    def encode(self, node: IPLDNode) -> bytes:
-        """Encode a PBNode (or equivalent dict) to DAG-PB bytes."""
+    def encode_to_stream(self, node: IPLDNode, stream: BinaryIO) -> int:
+        """Encode a PBNode (or equivalent dict) to *stream*."""
         pb_node = _prepare_node(node)
         _validate_node(pb_node)
-        return _encode_pb_node(pb_node)
+        data = _encode_pb_node(pb_node)
+        return stream.write(data)
+
+    def decode_from_stream(self, stream: BinaryIO) -> IPLDNode:
+        """Decode DAG-PB from *stream* into a dict with ``Data``/``Links``."""
+        return self.decode(stream.read())
+
+    def encode(self, node: IPLDNode) -> bytes:
+        """Encode a PBNode (or equivalent dict) to DAG-PB bytes."""
+        buf = io.BytesIO()
+        self.encode_to_stream(node, buf)
+        return buf.getvalue()
 
     def decode(self, data: bytes) -> IPLDNode:
         """Decode DAG-PB bytes into a dict with ``Data`` and ``Links`` keys."""

@@ -1,0 +1,1 @@
+Add ``encode_to_stream`` / ``decode_from_stream`` on codecs (``BinaryIO``), using ``cbor2``/``json`` dump-load for DAG-CBOR/JSON. The IPLD value is still fully materialized; the wire form can be written/read without an extra full intermediate ``bytes`` copy on the stream API.

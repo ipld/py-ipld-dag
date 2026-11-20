@@ -25,8 +25,9 @@ Reference implementations:
 from __future__ import annotations
 
 import base64
+import io
 import json
-from typing import Any
+from typing import Any, BinaryIO
 
 from cid import make_cid
 
@@ -53,8 +54,8 @@ class DagJsonCodec(BlockCodec):
     def code(self) -> int:
         return DAG_JSON_CODE
 
-    def encode(self, node: IPLDNode) -> bytes:
-        """Encode an IPLD value to DAG-JSON bytes.
+    def encode_to_stream(self, node: IPLDNode, stream: BinaryIO) -> int:
+        """Encode an IPLD value to DAG-JSON via ``json.dump`` on *stream*.
 
         - CIDs → ``{"/": "<cid-string>"}``
         - bytes → ``{"/": {"bytes": "<base64-no-pad>"}}``
@@ -63,18 +64,55 @@ class DagJsonCodec(BlockCodec):
         - Non-ASCII text as raw UTF-8.
         """
         prepared = _prepare_for_json(node)
-        return json.dumps(prepared, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False).encode(
-            "utf-8"
+        start = stream.tell() if stream.seekable() else None
+        text = io.TextIOWrapper(stream, encoding="utf-8", write_through=True, newline="")
+        try:
+            json.dump(
+                prepared,
+                text,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            )
+            text.flush()
+        finally:
+            text.detach()
+        if start is not None:
+            return stream.tell() - start
+        # Non-seekable: byte length of the same dump (still uses json.dump above).
+        return len(
+            json.dumps(
+                prepared,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ).encode("utf-8")
         )
 
-    def decode(self, data: bytes) -> IPLDNode:
-        """Decode DAG-JSON bytes into an IPLD value.
+    def decode_from_stream(self, stream: BinaryIO) -> IPLDNode:
+        """Decode DAG-JSON from a binary stream via ``json.load``.
 
         Recognizes ``{"/": ...}`` sentinel objects and converts them
         back to CID or bytes values.
         """
-        raw = json.loads(data)
+        text = io.TextIOWrapper(stream, encoding="utf-8", newline="")
+        try:
+            raw = json.load(text)
+        finally:
+            text.detach()
         return _restore_from_json(raw)
+
+    def encode(self, node: IPLDNode) -> bytes:
+        """Encode an IPLD value to DAG-JSON bytes."""
+        buf = io.BytesIO()
+        self.encode_to_stream(node, buf)
+        return buf.getvalue()
+
+    def decode(self, data: bytes) -> IPLDNode:
+        """Decode DAG-JSON bytes into an IPLD value."""
+        return self.decode_from_stream(io.BytesIO(data))
 
 
 def _base64_encode_no_pad(data: bytes) -> str:
