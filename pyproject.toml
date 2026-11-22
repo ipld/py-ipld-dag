@@ -28,11 +28,11 @@ classifiers = [
 requires-python = ">=3.10, <4.0"
 dependencies = [
     "cbor2>=6.0.0",
-    "py-cid>=0.4.0",
-    "py-multihash>=3.0.0",
+    "py-cid>=0.6.0",
+    "py-multihash>=4.0.0",
     "base58>=2.0.0",
-    "py-multibase>=2.0.0",
-    "py-multicodec>=1.0.0",
+    "py-multibase>=2.1.0",
+    "py-multicodec>=1.1.0",
 ]
 
 [project.urls]
