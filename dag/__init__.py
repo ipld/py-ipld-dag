@@ -32,7 +32,7 @@ Usage::
 
 __author__ = """Dhruv Baldawa"""
 __email__ = "dhruv@dhruvb.com"
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 from . import codecs as codecs  # triggers auto-registration
 from .block import Block, LinkBoundaryError, walk_links
