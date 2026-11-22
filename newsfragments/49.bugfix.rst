@@ -1,1 +1,0 @@
-Sort DAG-PB links with a missing Name first, as empty strings, per the DAG-PB spec. DAG-PB bytes and CIDs change for nodes mixing named and unnamed links.

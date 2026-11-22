@@ -1,1 +1,0 @@
-Validate that CIDv0 encoding requires dag-pb and sha2-256.

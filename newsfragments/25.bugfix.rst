@@ -1,1 +1,0 @@
-Reject non-string map keys when encoding DAG-JSON.

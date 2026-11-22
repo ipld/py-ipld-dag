@@ -1,1 +1,0 @@
-Decode DAG-PB links whose Hash is a CIDv0 (bare multihash) instead of raising.

@@ -1,1 +1,0 @@
-Fix DAG-CBOR CID decoding for ``cbor2`` 6.x ``tag_hook`` signature.

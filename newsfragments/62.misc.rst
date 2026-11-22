@@ -1,1 +1,0 @@
-Raise lower bounds to ``py-cid>=0.6.0``, ``py-multihash>=4.0.0``, ``py-multibase>=2.1.0``, and ``py-multicodec>=1.1.0``.
